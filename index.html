@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="id">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eksperimen Pemulihan Berkas Terhapus</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Lab notebook: a narrow reading column for the story, full-width panels for the evidence. */
+:root {
+  --bg: #f5f6f8; --panel: #ffffff; --fg: #1b2330; --fg-muted: #5b6676; --line: #dde2e9;
+  --grid: #edf0f4; --axis: #9aa4b2; --ref: #8a94a3; --popover: #ffffff;
+  --c-utuh: #2f6fd6; --c-gab: #d9822b; --c-fs: #8a63d2; --c-carve: #1c9583;
+  --c-dummy: #3f4857; --c-habis: #d5dbe3; --c-ghost: #c9d0da; --warn: #9a6512;
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --radius: 8px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #10141a; --panel: #171c24; --fg: #e5e9ef; --fg-muted: #9aa5b4; --line: #29303b;
+  --grid: #20262f; --axis: #5b6574; --ref: #7d8796; --popover: #1f252f;
+  --c-utuh: #6ea2ff; --c-gab: #f0a356; --c-fs: #ab8ef2; --c-carve: #40c4ae;
+  --c-dummy: #c3cbd6; --c-habis: #343c49; --c-ghost: #3e4756; --warn: #e2b04f;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #10141a; --panel: #171c24; --fg: #e5e9ef; --fg-muted: #9aa5b4; --line: #29303b;
+  --grid: #20262f; --axis: #5b6574; --ref: #7d8796; --popover: #1f252f;
+  --c-utuh: #6ea2ff; --c-gab: #f0a356; --c-fs: #ab8ef2; --c-carve: #40c4ae;
+  --c-dummy: #c3cbd6; --c-habis: #343c49; --c-ghost: #3e4756; --warn: #e2b04f;
+  color-scheme: dark; }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 48px; }
+.lp { max-width: 1120px; margin-inline: auto; display: flex; flex-direction: column; gap: 28px; }
+.lp-head { display: flex; flex-direction: column; gap: 10px; max-width: 70ch; }
+.lp-eyebrow { margin: 0; font-family: var(--font-data); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--fg-muted); }
+.lp-title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 5vw, 44px); line-height: 1.08; text-wrap: balance; letter-spacing: -.01em; }
+.lp-lede { margin: 0; font-size: 16.5px; line-height: 1.65; }
+.lp-lede b, .lp-card-head b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.lp-flag { display: inline-flex; align-items: center; gap: 8px; width: fit-content; font-size: 13px; color: var(--fg-muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; background: var(--panel); }
+.lp-flag i { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+.lp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); gap: 16px; }
+.lp-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.lp-card-head { display: flex; flex-direction: column; gap: 4px; }
+.lp-card-head h2 { margin: 0; font-size: 18px; font-weight: 500; text-wrap: balance; }
+.lp-card-head p, .lp-foot { margin: 0; font-size: 13.5px; color: var(--fg-muted); line-height: 1.55; max-width: 78ch; }
+.lp-tools { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.lp-seg { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.lp-seg-label { font-size: 12.5px; color: var(--fg-muted); margin-right: 4px; }
+.lp-seg button { font: inherit; font-size: 13px; padding: 4px 11px; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; font-variant-numeric: tabular-nums; }
+.lp-seg button:hover:not(:disabled) { border-color: var(--axis); }
+.lp-seg button[aria-pressed="true"] { background: var(--fg); color: var(--panel); border-color: var(--fg); }
+.lp-seg button:disabled { opacity: .4; cursor: not-allowed; }
+.lp-seg button:focus-visible { outline: 2px solid var(--c-utuh); outline-offset: 2px; }
+.lp-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--fg-muted); }
+.lp-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lp-sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; flex: none; }
+.lp-sw-line { height: 3px; }
+.lp-chart, .lp-heat, .lp-peta, .lp-progres { position: relative; min-width: 0; }
+.lp-chart { min-height: 300px; }
+.lp-heat { min-height: 470px; overflow-x: auto; }
+.lp-peta { min-height: 230px; }
+.lp-progres { overflow-x: auto; }
+.lp svg { display: block; overflow: visible; }
+.lp svg text { fill: var(--fg-muted); font-family: var(--font-data); font-size: 11px; }
+.lp svg .lp-strong { fill: var(--fg); }
+.lp svg .lp-on-fill { fill: var(--panel); font-weight: 500; }
+.lp-tip { position: absolute; pointer-events: none; z-index: 2; background: var(--popover); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 20px rgba(10, 20, 35, .14); padding: 6px 10px; font-size: 12.5px; line-height: 1.5; min-width: 160px; max-width: 270px; }
+.lp-tip-h { color: var(--fg-muted); margin-bottom: 2px; font-family: var(--font-data); font-size: 11.5px; }
+.lp-tip-r { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.lp-tip-r b { margin-left: auto; font-weight: 600; padding-left: 12px; }
+.lp-pgrid { display: grid; gap: 4px; font-size: 12px; color: var(--fg-muted); min-width: 440px; font-family: var(--font-data); }
+.lp-pcell { height: 22px; border-radius: 3px; border: 1px dashed var(--line); }
+.lp-pcell.ok { border: 0; background: var(--c-utuh); }
+.lp-phead { text-align: center; white-space: nowrap; }
+.lp-prow { display: flex; align-items: center; }
+.lp-stats { display: flex; flex-wrap: wrap; gap: 8px 32px; margin-bottom: 8px; }
+.lp-stat { display: flex; flex-direction: column; gap: 2px; }
+.lp-stat span { font-size: 12.5px; color: var(--fg-muted); }
+.lp-stat strong { font-family: var(--font-display); font-weight: 400; font-size: 24px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.lp-callout { margin: 0; font-size: 13.5px; line-height: 1.6; border-left: 2px solid var(--ref); padding-left: 12px; max-width: 82ch; }
+.lp-tag { color: var(--warn); font-weight: 600; }
+.lp details { font-size: 13.5px; color: var(--fg-muted); line-height: 1.6; border-top: 1px solid var(--line); padding-top: 16px; }
+.lp summary { cursor: pointer; color: var(--fg); font-size: 15px; }
+.lp summary:focus-visible { outline: 2px solid var(--c-utuh); outline-offset: 2px; }
+.lp dl { display: grid; grid-template-columns: minmax(8rem, max-content) 1fr; gap: 6px 18px; margin: 14px 0 0; max-width: 92ch; }
+.lp dt { color: var(--fg); font-weight: 600; }
+.lp dd { margin: 0; }
+.lp-identik { min-height: 200px; }
+.lp-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 6px; }
+.lp-tile { border-radius: 6px; padding: 6px 9px; font-family: var(--font-data); font-size: 12px; line-height: 1.35; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.lp-tile small { font-family: var(--font-body); font-size: 11px; }
+.lp-tile.identik { background: var(--c-utuh); color: var(--panel); }
+.lp-tile.tertimpa { border: 1.5px solid var(--c-utuh); color: var(--fg); }
+.lp-tile.tertimpa b { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.lp-tile.tertimpa small { color: var(--fg-muted); }
+.lp-tile.tidak { border: 1px dashed var(--line); color: var(--fg-muted); }
+.lp-tile b { font-weight: 500; overflow-wrap: anywhere; }
+.lp-q { margin: 0; padding: 0; list-style: none; counter-reset: q; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 12px; }
+.lp-q li { counter-increment: q; display: grid; grid-template-columns: 2rem 1fr; gap: 2px 10px; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); }
+.lp-q li::before { content: counter(q); grid-row: span 3; font-family: var(--font-display); font-size: 28px; line-height: 1; color: var(--c-utuh); }
+.lp-q h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.lp-q p { margin: 0; font-size: 13.5px; color: var(--fg-muted); line-height: 1.55; }
+.lp-q a { font-size: 13px; color: var(--c-utuh); text-underline-offset: 3px; width: fit-content; }
+.lp-q a:focus-visible { outline: 2px solid var(--c-utuh); outline-offset: 2px; }
+.lp-colophon { margin: 0; font-family: var(--font-data); font-size: 11.5px; color: var(--fg-muted); }
+@media (max-width: 520px) { .lp dl { grid-template-columns: 1fr; } .lp dd { margin-bottom: 8px; } .lp-card { padding: 16px; } }
+</style>
+
+<div class="lp">
+  <header class="lp-head" id="ringkasan">
+    <p class="lp-eyebrow">Skripsi · Forensik digital · NTFS · Autopsy dan PhotoRec</p>
+    <h1 class="lp-title">Eksperimen Pemulihan Berkas Terhapus</h1>
+    <p class="lp-lede">Ulangan pertama sudah selesai di semua kondisi. PhotoRec memulihkan <b data-nilai="kondisi|photorec|tk05_n5">—</b> dan <b data-nilai="kondisi|photorec|tk10_n5">—</b> dari <b data-nilai="kondisi|jumlah_berkas|tk0">—</b> berkas pada penulisan 5% dan 10%, lalu turun tajam di 25% menjadi <b data-nilai="kondisi|photorec|tk25_n5">—</b> berkas (5 berkas baru) dan <b data-nilai="kondisi|photorec|tk25_n74">—</b> berkas (74 berkas baru). Yang membatasi pemulihan adalah isi yang tertimpa: PhotoRec selalu memulihkan tepat berkas yang isinya masih utuh.</p>
+    <span class="lp-flag"><i></i>Satu ulangan. Rata-rata dan sebaran menunggu u2 sampai u5.</span>
+  </header>
+
+  <section class="lp-card" id="progres">
+    <div class="lp-card-head">
+      <h2>Progres percobaan</h2>
+      <p><b data-nilai="ringkas|selesai">—</b> dari <b data-nilai="ringkas|total">—</b> run selesai sampai skor hash. Setiap run: tulis berkas baru di VM, buat citra E01, pulihkan dengan Autopsy dan PhotoRec, lalu cocokkan hash.</p>
+    </div>
+    <div class="lp-progres" data-draw="progres"></div>
+    <div class="lp-legend">
+      <span><i class="lp-sw" style="background: var(--c-utuh)"></i>Selesai</span>
+      <span><i class="lp-sw" style="border: 1px dashed var(--line)"></i>Belum dijalankan</span>
+    </div>
+  </section>
+
+  <div class="lp-grid">
+    <section class="lp-card" id="kurva">
+      <div class="lp-card-head">
+        <h2>Berkas pulih per tingkat penulisan</h2>
+        <p>Pulih berarti hash SHA-256 hasil pemulihan sama dengan berkas asli. Garis tebal pucat adalah jumlah berkas yang isinya masih utuh 100%; garis PhotoRec menempel padanya di setiap titik.</p>
+      </div>
+      <div class="lp-tools">
+        <div class="lp-seg" role="group" aria-label="Jumlah berkas baru">
+          <span class="lp-seg-label">Berkas baru</span>
+          <button type="button" id="kurva-n5" data-set="n" data-val="5" data-redraw="kurva" aria-pressed="true">5 berkas besar</button>
+          <button type="button" id="kurva-n74" data-set="n" data-val="74" data-redraw="kurva" aria-pressed="false">74 berkas kecil</button>
+        </div>
+      </div>
+      <div class="lp-legend">
+        <span><i class="lp-sw" style="background: var(--c-ghost); height: 7px"></i>Utuh 100% (batas atas)</span>
+        <span><i class="lp-sw lp-sw-line" style="background: var(--c-utuh)"></i>PhotoRec</span>
+        <span><i class="lp-sw lp-sw-line" style="background: var(--c-gab)"></i>Autopsy gabungan</span>
+        <span><i class="lp-sw lp-sw-line" style="background: var(--c-fs)"></i>Autopsy jalur file system</span>
+        <span><i class="lp-sw lp-sw-line" style="background: var(--c-carve)"></i>Autopsy jalur carving</span>
+      </div>
+      <div class="lp-chart" data-draw="kurva"></div>
+      <p class="lp-foot">Dengan 74 berkas baru, semua record MFT berkas terhapus dipakai ulang, sehingga jalur file system Autopsy menemukan 0 berkas di semua tingkat. Selisih Autopsy dengan PhotoRec berasal dari video besar yang tidak ter-carve oleh modul Autopsy <span class="lp-tag">(dugaan kuat: batas berkas Unalloc 1 GB)</span>.</p>
+    </section>
+
+    <section class="lp-card" id="keutuhan">
+      <div class="lp-card-head">
+        <h2>Isi berkas yang masih utuh</h2>
+        <p>Satu baris per berkas uji, diurutkan menurut letaknya di disk. Angka di sel adalah persen klaster asli yang masih sama. Tanda ✓ berarti berkas itu dipulihkan dengan hash cocok.</p>
+      </div>
+      <div class="lp-tools">
+        <div class="lp-seg" role="group" aria-label="Alat yang ditandai">
+          <span class="lp-seg-label">Tanda ✓ untuk</span>
+          <button type="button" id="tanda-pr" data-set="tanda" data-val="photorec" data-redraw="heat" aria-pressed="true">PhotoRec</button>
+          <button type="button" id="tanda-au" data-set="tanda" data-val="autopsy" data-redraw="heat" aria-pressed="false">Autopsy</button>
+        </div>
+      </div>
+      <div class="lp-legend">
+        <span><i class="lp-sw" style="background: var(--c-utuh)"></i>Utuh 100%</span>
+        <span><i class="lp-sw" style="background: var(--c-utuh); opacity: .38"></i>Tertimpa sebagian</span>
+        <span><i class="lp-sw" style="background: var(--c-habis)"></i>Tertimpa habis</span>
+      </div>
+      <div class="lp-heat" data-draw="heat"></div>
+      <p class="lp-foot">Berkas baru selalu mulai ditulis dari awal ruang kosong, jadi berkas yang letaknya di depan (arc, aud, doc, dan seterusnya) tertimpa lebih dulu. Letak berkas ikut bercampur dengan tipenya: video selamat karena letaknya di belakang.</p>
+    </section>
+  </div>
+
+  <section class="lp-card" id="identik">
+    <div class="lp-card-head">
+      <h2>Ditemukan tidak sama dengan identik</h2>
+      <p>Jalur file system Autopsy mengekspor berkas terhapus yang record MFT-nya belum dipakai ulang, lengkap dengan nama aslinya. Nama asli tidak menjamin isinya: bila klasternya sudah tertimpa berkas baru, hash-nya tidak cocok. Kalau penilaian hanya melihat nama berkas, hasilnya akan tampak jauh lebih baik dari kenyataan. Kondisi di bawah memakai 5 berkas baru.</p>
+    </div>
+    <div class="lp-tools">
+      <div class="lp-seg" role="group" aria-label="Tingkat penulisan untuk kartu ekspor">
+        <span class="lp-seg-label">Tingkat</span>
+        <button type="button" id="it-0" data-set="it" data-val="0" data-redraw="identik">0%</button>
+        <button type="button" id="it-5" data-set="it" data-val="5" data-redraw="identik">5%</button>
+        <button type="button" id="it-10" data-set="it" data-val="10" data-redraw="identik">10%</button>
+        <button type="button" id="it-25" data-set="it" data-val="25" data-redraw="identik">25%</button>
+        <button type="button" id="it-50" data-set="it" data-val="50" data-redraw="identik">50%</button>
+      </div>
+    </div>
+    <div class="lp-legend">
+      <span><i class="lp-sw" style="background: var(--c-utuh)"></i>Diekspor, isi identik</span>
+      <span><i class="lp-sw" style="border: 1.5px solid var(--c-utuh)"></i>Diekspor, isi sudah tertimpa</span>
+      <span><i class="lp-sw" style="border: 1px dashed var(--fg-muted)"></i>Tidak diekspor (record MFT dipakai ulang)</span>
+    </div>
+    <div class="lp-identik" data-draw="identik"></div>
+    <p class="lp-foot">Status ekspor diturunkan dari record MFT di citra disk. Untuk setiap kondisi, jumlah berkas yang diekspor dan identik sama dengan skor jalur file system Autopsy, dan untuk 25% serta 50% juga cocok dengan catatan log run.</p>
+  </section>
+
+  <section class="lp-card" id="peta">
+    <div class="lp-card-head">
+      <h2>Peta disk: di mana berkas baru mendarat</h2>
+      <p>Baris atas menunjukkan letak 21 berkas uji, diwarnai menurut keutuhannya. Baris bawah menunjukkan letak berkas baru. Pilih tingkat penulisan dan jumlah berkas baru untuk melihat berkas baru ditulis ke disk.</p>
+    </div>
+    <div class="lp-tools">
+      <div class="lp-seg" role="group" aria-label="Tingkat penulisan">
+        <span class="lp-seg-label">Tingkat</span>
+        <button type="button" id="pt-0" data-set="pt" data-val="0" data-redraw="peta">0%</button>
+        <button type="button" id="pt-5" data-set="pt" data-val="5" data-redraw="peta">5%</button>
+        <button type="button" id="pt-10" data-set="pt" data-val="10" data-redraw="peta">10%</button>
+        <button type="button" id="pt-25" data-set="pt" data-val="25" data-redraw="peta">25%</button>
+        <button type="button" id="pt-50" data-set="pt" data-val="50" data-redraw="peta">50%</button>
+      </div>
+      <div class="lp-seg" role="group" aria-label="Jumlah berkas baru di peta">
+        <span class="lp-seg-label">Berkas baru</span>
+        <button type="button" id="pn-5" data-set="pn" data-val="5" data-redraw="peta">5</button>
+        <button type="button" id="pn-74" data-set="pn" data-val="74" data-redraw="peta">74</button>
+      </div>
+      <div class="lp-seg" role="group" aria-label="Rentang peta">
+        <span class="lp-seg-label">Rentang</span>
+        <button type="button" id="rg-awal" data-set="rentang" data-val="awal" data-redraw="peta">Awal disk</button>
+        <button type="button" id="rg-semua" data-set="rentang" data-val="semua" data-redraw="peta">Semua berkas uji</button>
+      </div>
+    </div>
+    <div class="lp-legend">
+      <span><i class="lp-sw" style="background: var(--c-utuh)"></i>Berkas uji utuh 100%</span>
+      <span><i class="lp-sw" style="background: var(--c-utuh); opacity: .38"></i>Tertimpa sebagian</span>
+      <span><i class="lp-sw" style="background: var(--c-habis)"></i>Tertimpa habis</span>
+      <span><i class="lp-sw" style="background: var(--c-dummy)"></i>Berkas baru</span>
+      <span><i class="lp-sw" style="background: var(--ref); opacity: .35"></i>Celah yang dilewati</span>
+    </div>
+    <div class="lp-peta" data-draw="peta"></div>
+    <p class="lp-callout">Coba 25% lalu 50% dengan 5 berkas baru. Setiap berkas baru besar dan butuh ruang kosong yang bersambung, jadi ia melompati celah yang lebih kecil dari ukurannya, dan berkas lama di celah itu selamat. Dengan 74 berkas baru yang kecil, celah itu ikut terisi. <span class="lp-tag">Mekanisme alokator NTFS ini masih dugaan.</span></p>
+  </section>
+
+  <section class="lp-card" id="pertanyaan">
+    <div class="lp-card-head">
+      <h2>Pertanyaan untuk dosen</h2>
+      <p>Empat keputusan yang dibutuhkan sebelum ulangan u2 dimulai. Nomor mengikuti §7 laporan hasil-u1.md.</p>
+    </div>
+    <ol class="lp-q">
+      <li>
+        <h3>Perlu tingkat penulisan antara?</h3>
+        <p>Hasil 5% sama dengan 10%, lalu turun tajam di 25%. Apakah u2 sampai u5 tetap memakai 5, 10, 25, dan 50%, atau ditambah tingkat antara seperti 15–20%?</p>
+        <a href="#kurva">Lihat grafik berkas pulih</a>
+      </li>
+      <li>
+        <h3>Seberapa besar porsi temuan tidak monoton?</h3>
+        <p>Dengan 5 berkas baru, 50% memulihkan lebih banyak berkas daripada 25%. Apakah ini dibahas sebagai temuan utama Bab 4 atau sebagai temuan pendukung?</p>
+        <a href="#peta">Lihat peta disk</a>
+      </li>
+      <li>
+        <h3>Batas Unalloc 1 GB: dilaporkan atau dibuktikan?</h3>
+        <p>Video besar yang tidak ter-carve Autopsy diduga kuat terbelah oleh batas berkas Unalloc 1 GB. Cukup dilaporkan sebagai keterbatasan alat, atau dibuktikan dengan mencocokkan batas Unalloc di case Autopsy pada u2?</p>
+        <a href="#kurva">Lihat selisih Autopsy dan PhotoRec</a>
+      </li>
+      <li>
+        <h3>Acak urutan salin berkas?</h3>
+        <p>Letak berkas di disk ikut bercampur dengan tipenya. Apakah urutan salin diacak per ulangan, atau dicatat sebagai keterbatasan? Jawaban ini bisa mengubah persiapan u2.</p>
+        <a href="#keutuhan">Lihat isi berkas yang masih utuh</a>
+      </li>
+    </ol>
+  </section>
+
+  <details>
+    <summary>Cara membaca dan cara menghitung</summary>
+    <dl>
+      <dt>Pulih</dt><dd>Ada berkas hasil pemulihan yang hash SHA-256-nya sama dengan berkas asli. Berkas yang muncul dengan nama asli tetapi isinya sudah tertimpa tidak dihitung.</dd>
+      <dt>Utuh 100%</dt><dd>Semua klaster asli berkas masih sama dengan sebelum berkas baru ditulis, dihitung dari citra disk dengan analisis.py.</dd>
+      <dt>Jalur Autopsy</dt><dd>Berkas yang diekspor dengan nama asli dihitung sebagai jalur file system (metadata MFT). Berkas dari $CarvedFiles dihitung sebagai jalur carving. Gabungan menghitung setiap berkas sekali.</dd>
+      <dt>Tingkat penulisan</dt><dd>Jumlah byte berkas baru dibagi ukuran total dataset uji. Jumlah byte di setiap kondisi sama persis dengan target.</dd>
+      <dt>Berkas baru</dt><dd>Dummy acak yang ditulis di VM setelah dataset dihapus dengan Shift+Delete: 5 berkas besar atau 74 berkas kecil dengan total byte yang sama.</dd>
+      <dt>Label</dt><dd>Angka di halaman ini terukur dari citra atau skor hash. Penjelasan mekanisme yang diberi tanda dugaan belum diuji.</dd>
+      <dt>Sumber data</dt><dd>CSV per run di eksperimen/hasil/dataset-asli, diringkas oleh skrip data-dashboard.py. Kolom jalur Autopsy diambil dari tabel hasil-u1.md, kolom lain dihitung ulang dari CSV dan dicocokkan dengan tabel itu.</dd>
+      <dt>Belum ada</dt><dd>Rata-rata dan sebaran antarulangan, waktu proses per alat, dan pencocokan batas Unalloc dengan case Autopsy.</dd>
+    </dl>
+  </details>
+  <p class="lp-colophon">Data dibangun <span id="dibuat">—</span> oleh skrip data-dashboard.py.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const DATA = {"dibuat":"08/11/2026 21:22","kondisi":[{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"jumlah_berkas":21,"utuh100":21,"mft_dipakai_ulang":0,"autopsy_fs":21,"autopsy_carving":20,"autopsy_gabungan":21,"photorec":21,"byte_baru":0},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"jumlah_berkas":21,"utuh100":20,"mft_dipakai_ulang":6,"autopsy_fs":15,"autopsy_carving":19,"autopsy_gabungan":20,"photorec":20,"byte_baru":76690240},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"jumlah_berkas":21,"utuh100":20,"mft_dipakai_ulang":21,"autopsy_fs":0,"autopsy_carving":19,"autopsy_gabungan":19,"photorec":20,"byte_baru":76690240},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"jumlah_berkas":21,"utuh100":20,"mft_dipakai_ulang":6,"autopsy_fs":15,"autopsy_carving":19,"autopsy_gabungan":20,"photorec":20,"byte_baru":153380480},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"jumlah_berkas":21,"utuh100":20,"mft_dipakai_ulang":21,"autopsy_fs":0,"autopsy_carving":19,"autopsy_gabungan":19,"photorec":20,"byte_baru":153380480},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"jumlah_berkas":21,"utuh100":6,"mft_dipakai_ulang":6,"autopsy_fs":3,"autopsy_carving":5,"autopsy_gabungan":6,"photorec":6,"byte_baru":383451200},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"jumlah_berkas":21,"utuh100":2,"mft_dipakai_ulang":21,"autopsy_fs":0,"autopsy_carving":1,"autopsy_gabungan":1,"photorec":2,"byte_baru":383451200},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"jumlah_berkas":21,"utuh100":8,"mft_dipakai_ulang":6,"autopsy_fs":3,"autopsy_carving":8,"autopsy_gabungan":8,"photorec":8,"byte_baru":766902400},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"jumlah_berkas":21,"utuh100":2,"mft_dipakai_ulang":21,"autopsy_fs":0,"autopsy_carving":2,"autopsy_gabungan":2,"photorec":2,"byte_baru":766902400}],"berkas":[{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":53,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":53,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":6,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":5,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":9,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":89,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":22,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":96,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":6,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":0,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":39,"mft_dipakai_ulang":"tidak","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"tidak","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"arc_lg.zip","urut":1,"ukuran_mb":162.5,"klaster":39670,"lcn_awal":4171,"lcn_akhir":43840,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"arc_md.zip","urut":2,"ukuran_mb":57.2,"klaster":13965,"lcn_awal":43841,"lcn_akhir":57805,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"arc_sm.zip","urut":3,"ukuran_mb":11.5,"klaster":2798,"lcn_awal":57806,"lcn_akhir":60603,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"aud_lg.mp3","urut":4,"ukuran_mb":42.1,"klaster":10268,"lcn_awal":60604,"lcn_akhir":70871,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"aud_md.mp3","urut":5,"ukuran_mb":15.8,"klaster":3855,"lcn_awal":70872,"lcn_akhir":74726,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"aud_sm.mp3","urut":6,"ukuran_mb":5.2,"klaster":1262,"lcn_awal":74727,"lcn_akhir":75988,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"doc_lg.docx","urut":7,"ukuran_mb":8.5,"klaster":2067,"lcn_awal":75989,"lcn_akhir":78055,"utuh_persen":23,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"doc_md.docx","urut":8,"ukuran_mb":2.1,"klaster":510,"lcn_awal":78057,"lcn_akhir":78566,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"doc_sm.docx","urut":9,"ukuran_mb":0.5,"klaster":128,"lcn_awal":78567,"lcn_akhir":78694,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"gfx_lg.png","urut":10,"ukuran_mb":8.3,"klaster":2038,"lcn_awal":78695,"lcn_akhir":80732,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"gfx_md.png","urut":11,"ukuran_mb":2.1,"klaster":505,"lcn_awal":80733,"lcn_akhir":81237,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"gfx_sm.png","urut":12,"ukuran_mb":0.5,"klaster":128,"lcn_awal":81238,"lcn_akhir":81365,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"img_lg.jpg","urut":13,"ukuran_mb":10.4,"klaster":2551,"lcn_awal":81366,"lcn_akhir":83916,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"img_md.jpg","urut":14,"ukuran_mb":3.1,"klaster":768,"lcn_awal":83917,"lcn_akhir":84684,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"img_sm.jpg","urut":15,"ukuran_mb":0.5,"klaster":133,"lcn_awal":84685,"lcn_akhir":84817,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"sample_lg.pdf","urut":16,"ukuran_mb":15.5,"klaster":3785,"lcn_awal":84818,"lcn_akhir":88602,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"sample_md.pdf","urut":17,"ukuran_mb":5.2,"klaster":1270,"lcn_awal":88603,"lcn_akhir":89872,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"sample_sm.pdf","urut":18,"ukuran_mb":1.1,"klaster":272,"lcn_awal":89873,"lcn_akhir":90144,"utuh_persen":0,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"vid_lg.mp4","urut":19,"ukuran_mb":921.3,"klaster":224915,"lcn_awal":90145,"lcn_akhir":315059,"utuh_persen":55,"mft_dipakai_ulang":"ya","photorec":"tidak","autopsy":"tidak"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"vid_md.mp4","urut":20,"ukuran_mb":209.0,"klaster":51034,"lcn_awal":315060,"lcn_akhir":366093,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"berkas":"vid_sm.mp4","urut":21,"ukuran_mb":51.4,"klaster":12553,"lcn_awal":366094,"lcn_akhir":378646,"utuh_persen":100,"mft_dipakai_ulang":"ya","photorec":"ya","autopsy":"ya"}],"dummy":[{"ulangan":"u1","kondisi":"tk05_n5","lcn_awal":4171,"panjang":3745},{"ulangan":"u1","kondisi":"tk05_n5","lcn_awal":7916,"panjang":3745},{"ulangan":"u1","kondisi":"tk05_n5","lcn_awal":11661,"panjang":3745},{"ulangan":"u1","kondisi":"tk05_n5","lcn_awal":15406,"panjang":3745},{"ulangan":"u1","kondisi":"tk05_n5","lcn_awal":19151,"panjang":3745},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":4171,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":4425,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":4679,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":4933,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":5187,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":5441,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":5696,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":5950,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":6204,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":6458,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":6712,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":6966,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":7220,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":7474,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":7728,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":7982,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":8236,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":8490,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":8744,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":8998,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":9252,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":9506,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":9760,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":10014,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":10268,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":10522,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":10776,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":11030,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":11284,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":11538,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":11792,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":12046,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":12300,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":12554,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":12808,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":13063,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":13317,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":13571,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":13825,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":14079,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":14333,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":14587,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":14841,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":15095,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":15349,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":15603,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":15857,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":16111,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":16365,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":16619,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":16873,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":17127,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":17381,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":17636,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":17890,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":18144,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":18398,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":18652,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":18906,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":19160,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":19414,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":19668,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":19922,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":20176,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":20430,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":20684,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":20938,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":21192,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":21446,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":21700,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":21954,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":22209,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":22463,"panjang":254},{"ulangan":"u1","kondisi":"tk05_n74","lcn_awal":22717,"panjang":254},{"ulangan":"u1","kondisi":"tk10_n5","lcn_awal":4171,"panjang":7490},{"ulangan":"u1","kondisi":"tk10_n5","lcn_awal":11661,"panjang":7490},{"ulangan":"u1","kondisi":"tk10_n5","lcn_awal":19151,"panjang":7490},{"ulangan":"u1","kondisi":"tk10_n5","lcn_awal":26641,"panjang":7490},{"ulangan":"u1","kondisi":"tk10_n5","lcn_awal":34131,"panjang":7490},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":4171,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":4678,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":5185,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":5692,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":6199,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":6706,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":7214,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":7721,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":8228,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":8735,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":9242,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":9749,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":10256,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":10763,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":11270,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":11777,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":12284,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":12791,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":13298,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":13805,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":14312,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":14819,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":15326,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":15833,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":16340,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":16847,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":17354,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":17861,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":18368,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":18875,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":19382,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":19889,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":20396,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":20903,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":21410,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":21918,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":22425,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":22932,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":23439,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":23946,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":24453,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":24960,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":25467,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":25974,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":26481,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":26988,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":27495,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":28002,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":28509,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":29016,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":29523,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":30030,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":30537,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":31045,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":31552,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":32059,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":32566,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":33073,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":33580,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":34087,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":34594,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":35101,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":35608,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":36115,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":36622,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":37129,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":37636,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":38143,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":38650,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":39157,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":39664,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":40172,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":40679,"panjang":507},{"ulangan":"u1","kondisi":"tk10_n74","lcn_awal":41186,"panjang":507},{"ulangan":"u1","kondisi":"tk25_n5","lcn_awal":4171,"panjang":18724},{"ulangan":"u1","kondisi":"tk25_n5","lcn_awal":22895,"panjang":18724},{"ulangan":"u1","kondisi":"tk25_n5","lcn_awal":41619,"panjang":18724},{"ulangan":"u1","kondisi":"tk25_n5","lcn_awal":78057,"panjang":18724},{"ulangan":"u1","kondisi":"tk25_n5","lcn_awal":96781,"panjang":18724},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":4171,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":5437,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":6703,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":7969,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":9235,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":10501,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":11768,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":13034,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":14300,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":15566,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":16832,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":18098,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":19364,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":20630,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":21896,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":23162,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":24428,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":25694,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":26960,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":28226,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":29492,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":30758,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":32024,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":33290,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":34556,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":35822,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":37088,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":38354,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":39620,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":40886,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":42152,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":43418,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":44684,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":45950,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":47216,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":48483,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":49749,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":51015,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":52281,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":53547,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":54813,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":56079,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":57345,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":58611,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":59877,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":61143,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":62409,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":63675,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":64941,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":66207,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":67473,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":68739,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":70005,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":71272,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":72538,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":73804,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":75070,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":76336,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":78057,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":79323,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":80589,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":81855,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":83121,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":84387,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":85653,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":86919,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":88185,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":89451,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":90717,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":91983,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":93249,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":94515,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":95781,"panjang":1266},{"ulangan":"u1","kondisi":"tk25_n74","lcn_awal":97047,"panjang":1266},{"ulangan":"u1","kondisi":"tk50_n5","lcn_awal":4171,"panjang":37447},{"ulangan":"u1","kondisi":"tk50_n5","lcn_awal":78057,"panjang":37447},{"ulangan":"u1","kondisi":"tk50_n5","lcn_awal":115504,"panjang":37447},{"ulangan":"u1","kondisi":"tk50_n5","lcn_awal":152951,"panjang":37447},{"ulangan":"u1","kondisi":"tk50_n5","lcn_awal":190398,"panjang":37447},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":4171,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":6702,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":9233,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":11764,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":14295,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":16826,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":19358,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":21889,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":24420,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":26951,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":29482,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":32013,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":34544,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":37075,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":39606,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":42137,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":44668,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":47199,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":49730,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":52261,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":54792,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":57323,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":59854,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":62385,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":64916,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":67447,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":69978,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":72509,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":75040,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":78057,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":80588,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":83119,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":85650,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":88181,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":90712,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":93243,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":95774,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":98305,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":100836,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":103367,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":105898,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":108429,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":110960,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":113491,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":116022,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":118553,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":121084,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":123615,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":126146,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":128677,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":131208,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":133739,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":136270,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":138801,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":141332,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":143863,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":146394,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":148925,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":151456,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":153987,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":156518,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":159049,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":161580,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":164111,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":166642,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":169173,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":171704,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":174235,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":176766,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":179297,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":181828,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":184359,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":186890,"panjang":2531},{"ulangan":"u1","kondisi":"tk50_n74","lcn_awal":189421,"panjang":2531}],"progres":[{"ulangan":"u1","kondisi":"tk0","tingkat":0,"n_baru":0,"status":"selesai"},{"ulangan":"u1","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"status":"selesai"},{"ulangan":"u1","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"status":"selesai"},{"ulangan":"u1","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"status":"selesai"},{"ulangan":"u1","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"status":"selesai"},{"ulangan":"u1","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"status":"selesai"},{"ulangan":"u1","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"status":"selesai"},{"ulangan":"u1","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"status":"selesai"},{"ulangan":"u1","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"status":"selesai"},{"ulangan":"u2","kondisi":"tk0","tingkat":0,"n_baru":0,"status":"belum"},{"ulangan":"u2","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"status":"belum"},{"ulangan":"u2","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"status":"belum"},{"ulangan":"u2","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"status":"belum"},{"ulangan":"u2","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"status":"belum"},{"ulangan":"u2","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"status":"belum"},{"ulangan":"u2","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"status":"belum"},{"ulangan":"u2","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"status":"belum"},{"ulangan":"u2","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"status":"belum"},{"ulangan":"u3","kondisi":"tk0","tingkat":0,"n_baru":0,"status":"belum"},{"ulangan":"u3","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"status":"belum"},{"ulangan":"u3","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"status":"belum"},{"ulangan":"u3","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"status":"belum"},{"ulangan":"u3","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"status":"belum"},{"ulangan":"u3","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"status":"belum"},{"ulangan":"u3","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"status":"belum"},{"ulangan":"u3","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"status":"belum"},{"ulangan":"u3","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"status":"belum"},{"ulangan":"u4","kondisi":"tk0","tingkat":0,"n_baru":0,"status":"belum"},{"ulangan":"u4","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"status":"belum"},{"ulangan":"u4","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"status":"belum"},{"ulangan":"u4","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"status":"belum"},{"ulangan":"u4","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"status":"belum"},{"ulangan":"u4","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"status":"belum"},{"ulangan":"u4","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"status":"belum"},{"ulangan":"u4","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"status":"belum"},{"ulangan":"u4","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"status":"belum"},{"ulangan":"u5","kondisi":"tk0","tingkat":0,"n_baru":0,"status":"belum"},{"ulangan":"u5","kondisi":"tk05_n5","tingkat":5,"n_baru":5,"status":"belum"},{"ulangan":"u5","kondisi":"tk05_n74","tingkat":5,"n_baru":74,"status":"belum"},{"ulangan":"u5","kondisi":"tk10_n5","tingkat":10,"n_baru":5,"status":"belum"},{"ulangan":"u5","kondisi":"tk10_n74","tingkat":10,"n_baru":74,"status":"belum"},{"ulangan":"u5","kondisi":"tk25_n5","tingkat":25,"n_baru":5,"status":"belum"},{"ulangan":"u5","kondisi":"tk25_n74","tingkat":25,"n_baru":74,"status":"belum"},{"ulangan":"u5","kondisi":"tk50_n5","tingkat":50,"n_baru":5,"status":"belum"},{"ulangan":"u5","kondisi":"tk50_n74","tingkat":50,"n_baru":74,"status":"belum"}]};
+</script>
+<script>
+function lpMulai() {
+  d3.formatDefaultLocale({ decimal: ',', thousands: '.', grouping: [3], currency: ['Rp', ''] });
+  const fmt = d3.format(',');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const S = { ulangan: 'u1', n: 5, tanda: 'photorec', pt: 25, pn: 5, rentang: 'awal', it: 25 };
+  try { const s = JSON.parse(localStorage.getItem('lp-state') || 'null'); if (s) Object.assign(S, s, { ulangan: 'u1' }); } catch (e) {}
+  const kode = (r) => +r.n_baru === 0 ? '0%' : `${r.tingkat}%/${r.n_baru}`;
+  const W = { utuh: 'var(--c-ghost)', photorec: 'var(--c-utuh)', gab: 'var(--c-gab)', fs: 'var(--c-fs)', carve: 'var(--c-carve)' };
+  const isi = (p) => p >= 100 ? ['var(--c-utuh)', 1] : p > 0 ? ['var(--c-utuh)', 0.38] : ['var(--c-habis)', 1];
+  const sortK = (a, b) => +a.tingkat - +b.tingkat || +a.n_baru - +b.n_baru;
+
+  function tip(box, x, y, head, rows) {
+    let t = box.querySelector('.lp-tip');
+    if (!t) { t = document.createElement('div'); t.className = 'lp-tip'; box.appendChild(t); }
+    t.replaceChildren();
+    const h = document.createElement('div'); h.className = 'lp-tip-h'; h.textContent = head; t.appendChild(h);
+    for (const r of rows) {
+      const d = document.createElement('div'); d.className = 'lp-tip-r';
+      if (r.color) { const s = document.createElement('i'); s.className = 'lp-sw'; s.style.background = r.color; d.appendChild(s); }
+      const l = document.createElement('span'); l.textContent = r.label; d.appendChild(l);
+      if (r.value != null) { const v = document.createElement('b'); v.textContent = r.value; d.appendChild(v); }
+      t.appendChild(d);
+    }
+    t.hidden = false;
+    const bw = box.clientWidth, tw = t.offsetWidth, th = t.offsetHeight;
+    let left = x + 14; if (left + tw > bw) left = Math.max(0, x - tw - 14);
+    const top = Math.max(0, Math.min(y - th / 2, box.clientHeight - th));
+    t.style.left = left + 'px'; t.style.top = top + 'px';
+  }
+  const untip = (box) => { const t = box.querySelector('.lp-tip'); if (t) t.hidden = true; };
+
+  // values inside sentences
+  const ringkas = { selesai: DATA.progres.filter((r) => r.status === 'selesai').length, total: DATA.progres.length };
+  document.querySelectorAll('[data-nilai]').forEach((el) => {
+    const [src, field, k] = el.dataset.nilai.split('|');
+    let v;
+    if (src === 'ringkas') v = ringkas[field];
+    else { const r = DATA.kondisi.find((x) => x.ulangan === S.ulangan && x.kondisi === k); v = r ? +r[field] : null; }
+    el.textContent = v == null ? '—' : fmt(v);
+  });
+  document.getElementById('dibuat').textContent = DATA.dibuat;
+
+  const draws = {
+    progres(el) {
+      el.replaceChildren();
+      const kond = [...new Map(DATA.progres.map((r) => [r.kondisi, r])).values()].sort(sortK);
+      const ul = [...new Set(DATA.progres.map((r) => r.ulangan))];
+      const grid = document.createElement('div'); grid.className = 'lp-pgrid';
+      grid.style.gridTemplateColumns = `2.4rem repeat(${kond.length}, minmax(0, 1fr))`;
+      grid.appendChild(document.createElement('span'));
+      for (const k of kond) { const h = document.createElement('span'); h.className = 'lp-phead'; h.textContent = kode(k); grid.appendChild(h); }
+      for (const u of ul) {
+        const l = document.createElement('span'); l.className = 'lp-prow'; l.textContent = u; grid.appendChild(l);
+        for (const k of kond) {
+          const r = DATA.progres.find((x) => x.ulangan === u && x.kondisi === k.kondisi);
+          const ok = r && r.status === 'selesai';
+          const c = document.createElement('span'); c.className = 'lp-pcell' + (ok ? ' ok' : '');
+          c.title = `${u} ${kode(k)}: ${ok ? 'selesai' : 'belum'}`;
+          grid.appendChild(c);
+        }
+      }
+      el.appendChild(grid);
+    },
+
+    kurva(el) {
+      el.replaceChildren();
+      const all = DATA.kondisi.filter((r) => r.ulangan === S.ulangan);
+      const rows = all.filter((r) => +r.n_baru === 0 || +r.n_baru === S.n)
+        .map((r) => ({ t: +r.tingkat, utuh: +r.utuh100, photorec: +r.photorec, gab: +r.autopsy_gabungan, fs: +r.autopsy_fs, carve: +r.autopsy_carving }))
+        .sort((a, b) => a.t - b.t);
+      const total = +all[0].jumlah_berkas;
+      const series = [
+        { k: 'utuh', label: 'Utuh 100%', w: 9 },
+        { k: 'photorec', label: 'PhotoRec', w: 2.25 },
+        { k: 'gab', label: 'Autopsy gabungan', w: 2 },
+        { k: 'fs', label: 'Autopsy file system', w: 1.75, dash: '6 4' },
+        { k: 'carve', label: 'Autopsy carving', w: 1.75, dash: '2 3' }
+      ];
+      const Wd = Math.max(280, el.clientWidth), H = 310, m = { t: 20, r: 14, b: 44, l: 32 };
+      const x = d3.scaleLinear([0, 50], [m.l, Wd - m.r]);
+      const y = d3.scaleLinear([0, total], [H - m.b, m.t]);
+      const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${Wd} ${H}`).attr('role', 'img')
+        .attr('aria-label', 'Grafik garis jumlah berkas pulih menurut tingkat penulisan');
+      svg.append('rect').attr('x', x(10)).attr('width', x(25) - x(10)).attr('y', m.t).attr('height', H - m.b - m.t)
+        .attr('fill', 'var(--ref)').attr('opacity', 0.1);
+      svg.append('text').attr('x', (x(10) + x(25)) / 2).attr('y', m.t + 13).attr('text-anchor', 'middle').text('penurunan tajam');
+      const yt = y.ticks(5).filter((v) => v <= total); if (!yt.includes(total)) yt.push(total);
+      svg.append('g').selectAll('line').data(yt).join('line').attr('x1', m.l).attr('x2', Wd - m.r)
+        .attr('y1', (d) => y(d)).attr('y2', (d) => y(d)).attr('stroke', 'var(--grid)');
+      svg.append('g').selectAll('text').data(yt).join('text').attr('x', m.l - 8).attr('y', (d) => y(d)).attr('dy', '0.32em')
+        .attr('text-anchor', 'end').text((d) => d);
+      svg.append('line').attr('x1', m.l).attr('x2', Wd - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--axis)');
+      // labels too close to the previous one drop to a second line
+      const xs = rows.map((r) => r.t);
+      svg.append('g').selectAll('text').data(xs).join('text').attr('x', (d) => x(d))
+        .attr('y', (d, i) => H - m.b + 16 + (i > 0 && i % 2 === 1 && x(d) - x(xs[i - 1]) < 30 ? 11 : 0))
+        .attr('text-anchor', 'middle').text((d) => d + '%');
+      svg.append('text').attr('x', Wd - m.r).attr('y', H - 1).attr('text-anchor', 'end').text('tingkat penulisan');
+      for (const s of series) {
+        svg.append('path').datum(rows).attr('d', d3.line().x((d) => x(d.t)).y((d) => y(d[s.k]))).attr('fill', 'none')
+          .attr('stroke', W[s.k]).attr('stroke-width', s.w).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round')
+          .attr('stroke-dasharray', s.dash ?? null);
+        if (s.k !== 'utuh') svg.append('g').selectAll('circle').data(rows).join('circle')
+          .attr('cx', (d) => x(d.t)).attr('cy', (d) => y(d[s.k])).attr('r', 2.8).attr('fill', W[s.k]);
+      }
+      const rule = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--axis)').attr('opacity', 0);
+      svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', Wd - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+        .on('pointermove', (ev) => {
+          const [px] = d3.pointer(ev);
+          const r = d3.least(rows, (d) => Math.abs(x(d.t) - px));
+          rule.attr('x1', x(r.t)).attr('x2', x(r.t)).attr('opacity', 1);
+          const k = el.clientWidth / Wd;
+          tip(el, x(r.t) * k, y(r.utuh) * k, r.t === 0 ? 'Tingkat 0% (tanpa berkas baru)' : `Tingkat ${r.t}% · ${S.n} berkas baru`,
+            series.map((s) => ({ color: W[s.k], label: s.label, value: `${r[s.k]}/${total}` })));
+        })
+        .on('pointerleave', () => { rule.attr('opacity', 0); untip(el); });
+    },
+
+    heat(el) {
+      el.replaceChildren();
+      const data = DATA.berkas.filter((r) => r.ulangan === S.ulangan);
+      const kond = [...new Map(data.map((r) => [r.kondisi, r])).values()].sort(sortK);
+      const files = data.filter((r) => r.kondisi === kond[0].kondisi).sort((a, b) => +a.urut - +b.urut);
+      const Wd = Math.max(320, el.clientWidth);
+      const svg = d3.select(el).append('svg').attr('role', 'img').attr('aria-label', 'Peta panas persen isi berkas yang masih utuh per kondisi');
+      const probe = svg.append('text').text('sample_lg.pdf');
+      const labelW = Math.ceil(probe.node().getComputedTextLength()) + 10; probe.remove();
+      const headH = 34, cellH = 20, gap = 2;
+      const cellW = Math.max(26, (Wd - labelW) / kond.length);
+      const realW = labelW + cellW * kond.length, H = headH + files.length * cellH + 4;
+      svg.attr('viewBox', `0 0 ${realW} ${H}`).attr('width', realW > el.clientWidth ? realW : '100%');
+      kond.forEach((k, i) => {
+        const cx = labelW + i * cellW + cellW / 2;
+        svg.append('text').attr('x', cx).attr('y', 12).attr('text-anchor', 'middle').attr('class', 'lp-strong').text(`${k.tingkat}%`);
+        svg.append('text').attr('x', cx).attr('y', 26).attr('text-anchor', 'middle').text(+k.n_baru ? `${k.n_baru} brk` : '—');
+      });
+      let prev = null;
+      files.forEach((f, j) => {
+        const yy = headH + j * cellH, grp = f.berkas.split('_')[0];
+        if (prev && grp !== prev) svg.append('line').attr('x1', 0).attr('x2', realW).attr('y1', yy).attr('y2', yy).attr('stroke', 'var(--line)');
+        prev = grp;
+        svg.append('text').attr('x', 0).attr('y', yy + cellH / 2).attr('dy', '0.32em').text(f.berkas);
+      });
+      const byKey = new Map(data.map((r) => [r.kondisi + '|' + r.berkas, r]));
+      kond.forEach((k, i) => files.forEach((f, j) => {
+        const r = byKey.get(k.kondisi + '|' + f.berkas); if (!r) return;
+        const p = +r.utuh_persen, [fill, op] = isi(p);
+        const x0 = labelW + i * cellW + gap / 2, y0 = headH + j * cellH + gap / 2, w = cellW - gap, h = cellH - gap;
+        const gg = svg.append('g');
+        gg.append('rect').attr('x', x0).attr('y', y0).attr('width', w).attr('height', h).attr('rx', 2).attr('fill', fill).attr('fill-opacity', op);
+        const txt = r[S.tanda] === 'ya' ? '✓' : (p > 0 && p < 100 ? String(p) : '');
+        if (txt) gg.append('text').attr('x', x0 + w / 2).attr('y', y0 + h / 2).attr('dy', '0.34em').attr('text-anchor', 'middle')
+          .attr('class', p >= 100 ? 'lp-on-fill' : 'lp-strong').style('font-size', '10px').text(txt);
+        gg.append('rect').attr('x', x0).attr('y', y0).attr('width', w).attr('height', h).attr('fill', 'transparent')
+          .on('pointermove', (ev) => {
+            const [px, py] = d3.pointer(ev, el);
+            tip(el, px - el.scrollLeft, py, `${r.berkas} · ${kode(r)}`, [
+              { label: 'Ukuran', value: `${d3.format(',.1f')(+r.ukuran_mb)} MB` },
+              { label: 'Isi masih utuh', value: `${p}%` },
+              { label: 'Record MFT dipakai ulang', value: r.mft_dipakai_ulang },
+              { label: 'PhotoRec pulih', value: r.photorec },
+              { label: 'Autopsy pulih', value: r.autopsy }
+            ]);
+          })
+          .on('pointerleave', () => untip(el));
+      }));
+    },
+
+    identik(el) {
+      el.replaceChildren();
+      const kd = S.it === 0 ? 'tk0' : `tk${String(S.it).padStart(2, '0')}_n5`;
+      const files = DATA.berkas.filter((r) => r.ulangan === S.ulangan && r.kondisi === kd).sort((a, b) => +a.urut - +b.urut);
+      const status = (f) => f.mft_dipakai_ulang === 'ya' ? 'tidak' : (+f.utuh_persen >= 100 ? 'identik' : 'tertimpa');
+      const ekspor = files.filter((f) => status(f) !== 'tidak').length;
+      const sama = files.filter((f) => status(f) === 'identik').length;
+      const stats = document.createElement('div'); stats.className = 'lp-stats';
+      for (const [label, value] of [
+        ['Diekspor dengan nama asli', `${ekspor} dari ${files.length}`],
+        ['Isi identik (hash cocok)', `${sama} dari ${files.length}`],
+        ['Bernama asli, isi tertimpa', `${ekspor - sama}`]
+      ]) {
+        const s = document.createElement('div'); s.className = 'lp-stat';
+        const a = document.createElement('span'); a.textContent = label;
+        const b = document.createElement('strong'); b.textContent = value;
+        s.append(a, b); stats.appendChild(s);
+      }
+      const tiles = document.createElement('div'); tiles.className = 'lp-tiles';
+      const ket = { identik: 'identik', tidak: 'record dipakai ulang' };
+      for (const f of files) {
+        const st = status(f);
+        const t = document.createElement('div'); t.className = `lp-tile ${st}`;
+        const b = document.createElement('b'); b.textContent = f.berkas;
+        const s = document.createElement('small');
+        s.textContent = st === 'tertimpa' ? `isi utuh ${f.utuh_persen}%` : ket[st];
+        t.append(b, s); tiles.appendChild(t);
+      }
+      el.append(stats, tiles);
+    },
+
+    peta(el) {
+      el.replaceChildren();
+      const kd = S.pt === 0 ? 'tk0' : `tk${String(S.pt).padStart(2, '0')}_n${S.pn}`;
+      const files = DATA.berkas.filter((r) => r.ulangan === S.ulangan && r.kondisi === kd).sort((a, b) => +a.lcn_awal - +b.lcn_awal);
+      const dum = DATA.dummy.filter((r) => r.ulangan === S.ulangan && r.kondisi === kd)
+        .map((r) => ({ a: +r.lcn_awal, n: +r.panjang })).sort((p, q) => p.a - q.a);
+      dum.forEach((d, i) => { d.i = i + 1; });
+      const gaps = [];
+      for (let i = 1; i < dum.length; i++) {
+        const end = dum[i - 1].a + dum[i - 1].n, len = dum[i].a - end;
+        if (len >= 500) gaps.push({ a: end, n: len });
+      }
+      const utuh = files.filter((f) => +f.utuh_persen >= 100).length, big = d3.max(gaps, (g) => g.n);
+      const stats = document.createElement('div'); stats.className = 'lp-stats';
+      const stat = (label, value) => {
+        const s = document.createElement('div'); s.className = 'lp-stat';
+        const a = document.createElement('span'); a.textContent = label;
+        const b = document.createElement('strong'); b.textContent = value;
+        s.append(a, b); stats.appendChild(s);
+      };
+      stat('Berkas baru', dum.length ? `${dum.length} · ${fmt(d3.sum(dum, (d) => d.n))} klaster` : 'tidak ada');
+      stat('Berkas uji utuh 100%', `${utuh} dari ${files.length}`);
+      stat('Celah terbesar yang dilewati', big ? `${fmt(big)} klaster` : 'tidak ada');
+      el.appendChild(stats);
+
+      const box = document.createElement('div'); box.style.position = 'relative'; el.appendChild(box);
+      const Wd = Math.max(300, el.clientWidth), H = 168, L1 = { y: 24, h: 36 }, L2 = { y: 102, h: 26 };
+      const maxEnd = d3.max(files, (f) => +f.lcn_akhir);
+      const dom = S.rentang === 'awal' ? [0, 240000] : [0, Math.ceil(maxEnd / 10000) * 10000];
+      const x = d3.scaleLinear(dom, [0, Wd]).clamp(true);
+      const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${Wd} ${H}`).attr('role', 'img')
+        .attr('aria-label', 'Peta letak berkas uji dan berkas baru di disk');
+      svg.append('clipPath').attr('id', 'lp-clip').append('rect').attr('width', Wd).attr('height', H);
+      const g = svg.append('g').attr('clip-path', 'url(#lp-clip)');
+      svg.append('text').attr('x', 0).attr('y', L1.y - 7).attr('class', 'lp-strong').text('Berkas uji');
+      svg.append('text').attr('x', 0).attr('y', L2.y - 7).attr('class', 'lp-strong').text('Berkas baru');
+      const wd = (a, n) => Math.max(0.6, x(a + n) - x(a));
+      const gapSel = g.selectAll('.gap').data(gaps).join('rect').attr('x', (d) => x(d.a)).attr('width', (d) => wd(d.a, d.n))
+        .attr('y', L1.y - 3).attr('height', L2.y + L2.h - L1.y + 6).attr('fill', 'var(--ref)').attr('opacity', 0.2);
+      g.selectAll('.f').data(files).join('rect')
+        .attr('x', (d) => x(+d.lcn_awal)).attr('width', (d) => wd(+d.lcn_awal, +d.lcn_akhir - +d.lcn_awal + 1))
+        .attr('y', L1.y).attr('height', L1.h)
+        .attr('fill', (d) => isi(+d.utuh_persen)[0]).attr('fill-opacity', (d) => isi(+d.utuh_persen)[1])
+        .attr('stroke', 'var(--panel)').attr('stroke-width', 0.5)
+        .on('pointermove', (ev, d) => {
+          const [px, py] = d3.pointer(ev, box);
+          tip(box, px, py, d.berkas, [
+            { label: 'LCN', value: `${fmt(+d.lcn_awal)}–${fmt(+d.lcn_akhir)}` },
+            { label: 'Klaster', value: fmt(+d.klaster) },
+            { label: 'Isi masih utuh', value: `${d.utuh_persen}%` },
+            { label: 'PhotoRec pulih', value: d.photorec }
+          ]);
+        })
+        .on('pointerleave', () => untip(box));
+      const grp = d3.rollups(files, (v) => [d3.min(v, (f) => +f.lcn_awal), d3.max(v, (f) => +f.lcn_akhir)], (f) => f.berkas.split('_')[0]);
+      // group labels under the test-file lane, with a bracket showing each group's span
+      let lastEnd = -Infinity;
+      for (const [name, [a, b]] of grp) {
+        const x0 = Math.max(0, x(a)), x1 = Math.min(Wd, x(b + 1));
+        if (x0 >= Wd || x1 <= 0) continue;
+        const yb = L1.y + L1.h + 4;
+        svg.append('path').attr('d', `M${x0 + 0.5},${yb} v4 H${x1 - 0.5} v-4`).attr('fill', 'none').attr('stroke', 'var(--axis)');
+        const cx = (x0 + x1) / 2, half = name.length * 3.4 + 3;
+        if (cx - half < lastEnd + 4) continue;
+        const anchor = cx - half < 0 ? 'start' : (cx + half > Wd ? 'end' : 'middle');
+        const tx = anchor === 'start' ? 0 : anchor === 'end' ? Wd : cx;
+        svg.append('text').attr('x', tx).attr('y', yb + 16).attr('text-anchor', anchor).text(name);
+        lastEnd = anchor === 'start' ? half * 2 : anchor === 'end' ? Wd : cx + half;
+      }
+      const dumSel = g.selectAll('.d').data(dum).join('rect').attr('x', (d) => x(d.a)).attr('y', L2.y).attr('height', L2.h)
+        .attr('fill', 'var(--c-dummy)').attr('stroke', 'var(--panel)').attr('stroke-width', 0.5)
+        .on('pointermove', (ev, d) => {
+          const [px, py] = d3.pointer(ev, box);
+          tip(box, px, py, `Berkas baru ke-${d.i}`, [
+            { label: 'LCN', value: `${fmt(d.a)}–${fmt(d.a + d.n - 1)}` },
+            { label: 'Klaster', value: fmt(d.n) }
+          ]);
+        })
+        .on('pointerleave', () => untip(box));
+      if (!dum.length) svg.append('text').attr('x', 0).attr('y', L2.y + L2.h / 2).attr('dy', '0.34em').text('Tidak ada berkas baru pada kondisi dasar 0%.');
+      const ticks = x.ticks(Math.max(3, Math.floor(Wd / 110)));
+      svg.append('line').attr('x1', 0).attr('x2', Wd).attr('y1', H - 22).attr('y2', H - 22).attr('stroke', 'var(--axis)');
+      svg.append('g').selectAll('text').data(ticks).join('text').attr('x', (d) => x(d)).attr('y', H - 7)
+        .attr('text-anchor', (d, i) => i === 0 ? 'start' : (x(d) > Wd - 30 ? 'end' : 'middle'))
+        .text((d) => d === 0 ? 'LCN 0' : `${fmt(d / 1000)} rb`);
+      const key = `${kd}|${S.rentang}`, animate = !reduce && draws.lastPeta !== key;
+      draws.lastPeta = key;
+      if (animate) {
+        const step = Math.min(60, 700 / Math.max(1, dum.length));
+        dumSel.attr('width', 0).transition().delay((d, i) => i * step).duration(260).ease(d3.easeCubicOut).attr('width', (d) => wd(d.a, d.n));
+        gapSel.attr('opacity', 0).transition().delay(dum.length * step + 150).duration(400).attr('opacity', 0.2);
+      } else dumSel.attr('width', (d) => wd(d.a, d.n));
+    }
+  };
+
+  const draw = (name) => document.querySelectorAll(`[data-draw="${name}"]`).forEach((el) => draws[name](el));
+  const sync = () => document.querySelectorAll('[data-set]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(String(S[b.dataset.set]) === b.dataset.val));
+    if (b.dataset.set === 'pn') b.disabled = S.pt === 0;
+  });
+  document.querySelectorAll('[data-set]').forEach((b) => b.addEventListener('click', () => {
+    const v = b.dataset.val;
+    S[b.dataset.set] = isNaN(+v) ? v : +v;
+    try { localStorage.setItem('lp-state', JSON.stringify(S)); } catch (e) {}
+    sync(); draw(b.dataset.redraw);
+  }));
+  sync();
+  ['progres', 'kurva', 'heat', 'identik', 'peta'].forEach(draw);
+
+  // redraw on width change only
+  const widths = new WeakMap();
+  const ro = new ResizeObserver((entries) => {
+    for (const e of entries) {
+      const w = Math.round(e.contentRect.width);
+      if (widths.get(e.target) === w) continue;
+      const first = !widths.has(e.target); widths.set(e.target, w);
+      if (!first) draws[e.target.dataset.draw](e.target);
+    }
+  });
+  document.querySelectorAll('[data-draw]').forEach((el) => ro.observe(el));
+}
+
+// d3 may arrive after this script runs: wait for it, and say so if it never comes
+(function tunggu(n) {
+  if (window.d3) { lpMulai(); return; }
+  if (n < 300) { setTimeout(() => tunggu(n + 1), 50); return; }
+  document.querySelectorAll('[data-draw]').forEach((el) => {
+    el.textContent = 'Grafik gagal dimuat karena pustaka d3 tidak terunduh. Coba muat ulang halaman.';
+  });
+})(0);
+</script>
